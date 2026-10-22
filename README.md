@@ -4,13 +4,13 @@
 
 ### `TWELVE`
 
-**Abdurrahmaan Lakhota** — Infrastructure &amp; IT support
-Linux systems, self-hosted service stacks, and small tools that do one job properly.
+**Abdurrahmaan Lakhota** — Backend &amp; infrastructure engineering
+Services that run reliably, data that survives failure, and the Linux estate they sit on.
 
 <img src="https://img.shields.io/badge/status-final_year,_grad_2026-4a757e?style=flat-square&labelColor=0e1a1e" alt="status" />
 <img src="https://img.shields.io/badge/CCNA-in_progress-4a757e?style=flat-square&labelColor=0e1a1e" alt="CCNA" />
 <img src="https://img.shields.io/badge/location-United_Kingdom-4a757e?style=flat-square&labelColor=0e1a1e" alt="location" />
-<img src="https://img.shields.io/badge/open_to-IT_support_%2F_infrastructure-24393f?style=flat-square&labelColor=0e1a1e" alt="open to work" />
+<img src="https://img.shields.io/badge/open_to-backend_%2F_platform-24393f?style=flat-square&labelColor=0e1a1e" alt="open to work" />
 
 **[kota.dpdns.org](https://kota.dpdns.org)**
 
@@ -26,33 +26,46 @@ Most of what I learn happens on hardware I own. I run **fourteen containerised s
 
 Public services are exposed through a **Cloudflare Tunnel** — an outbound-only connector, so there is no port forwarding and **no inbound port open on the network**. This README's sibling site is served that way.
 
-Looking for **IT support and infrastructure roles**.
+I am moving that operational experience towards software: writing the services, not only running them. The first of those is below.
+
+Looking for **backend, platform and infrastructure roles**.
 
 ---
 
-## Devices
+## Projects
 
-Two published, zero-dependency Python CLI tools. Both exist because I hit the problem, found nothing that solved it cleanly, and wrote the thing.
+Three projects, built in the open and in this order. One is shipped; the other two are underway and will be linked here when they run end to end. Nothing on this page is a plan dressed up as a finished thing — the status is on every entry.
 
-| Tool | What it does | Language |
-| :--- | :--- | :--- |
-| **[anchorwatch](https://github.com/kota1738/anchorwatch)** | Markdown linter that catches broken relative links, missing images and dead heading anchors — offline, reproducing GitHub's own anchor-slug algorithm rather than guessing at it. | Python |
-| **[changelog-guard](https://github.com/kota1738/changelog-guard)** | Reconciles `CHANGELOG.md` against your git tags: missing sections, broken compare links, bad dates, semver ordering that quietly slipped. | Python |
+### 01 — Distributed task queue API &nbsp;`shipped`
 
-Neither has a dependency tree. Both run anywhere Python does, including in CI.
+[**distributed-task-queue**](https://github.com/kota1738/distributed-task-queue) — an asynchronous job-processing service. Clients submit work over REST and get an id back immediately; separate worker processes claim jobs and execute them, and every job is trackable through `queued`, `running`, `succeeded`, `failed` and `cancelled`.
 
-<details>
-<summary><b>Also on file</b></summary>
+Python · FastAPI · PostgreSQL · Redis · Docker · pytest · GitHub Actions
 
-<br />
+- Job state and JSON results live in **PostgreSQL**. Redis is only a wake-up channel, so a broker outage delays work instead of losing it.
+- Workers claim jobs atomically with `SELECT … FOR UPDATE SKIP LOCKED` plus a status guard, so concurrent workers never run the same job twice.
+- Retries with **exponential backoff** and per-job attempt limits, idempotency keys so client retries are safe, and a lease reaper that requeues jobs orphaned by a crashed worker.
+- JWT bearer auth with per-user job isolation; payloads validated against the job type's schema **before** the row is written, so a bad job fails with `422` rather than inside a worker.
+- **64 tests** covering API, worker, auth and handlers, run in CI against real PostgreSQL and Redis; Docker Compose deployment with readiness and liveness probes.
 
-| Repository | Notes |
-| :--- | :--- |
-| **[portfolio-site](https://github.com/kota1738/portfolio-site)** | This profile's sibling site. Plain HTML, CSS and JavaScript — no framework, no dependencies, no external requests. Self-hosted in a container behind the tunnel, mirrored to Pages. |
-| **[VCT-Project](https://github.com/kota1738/VCT-Project)** | Dissertation work — a scraping and cleaning pipeline over a competitive esports dataset, then hypothesis testing to separate significant regional differences from noise. Jupyter, pandas. |
-| **[web-project](https://github.com/kota1738/web-project)** | TypeScript front-end work. |
+```bash
+git clone https://github.com/kota1738/distributed-task-queue
+cd distributed-task-queue && python scripts/demo.py   # full lifecycle, no services needed
+```
 
-</details>
+### 02 — Infrastructure monitoring and alerting &nbsp;`in progress`
+
+Observability for the estate described above: a Python collector for CPU, memory, disk and per-service health, **Prometheus** for storage, **Grafana** for dashboards, alert rules that fire on defined thresholds, and runbooks for troubleshooting and recovery.
+
+Stack: Python · Linux · Docker · Prometheus · Grafana · notification webhook
+Status: specification complete, implementation underway.
+
+### 03 — Staff management system &nbsp;`in progress`
+
+A C# application backed by a relational database, taken from coursework to something independently demonstrable: full CRUD with filtering, login and role-based permissions, database constraints, automated tests and a repeatable deployment.
+
+Stack: C# · ASP.NET Core · SQL Server · xUnit
+Status: implementation underway.
 
 ---
 
@@ -61,7 +74,12 @@ Neither has a dependency tree. Both run anywhere Python does, including in CI.
 <div align="center">
 
 <img src="https://img.shields.io/badge/Python-15252a?style=for-the-badge&logo=python&logoColor=7cb2bd" alt="Python" />
+<img src="https://img.shields.io/badge/FastAPI-15252a?style=for-the-badge&logo=fastapi&logoColor=7cb2bd" alt="FastAPI" />
+<img src="https://img.shields.io/badge/PostgreSQL-15252a?style=for-the-badge&logo=postgresql&logoColor=7cb2bd" alt="PostgreSQL" />
+<img src="https://img.shields.io/badge/Redis-15252a?style=for-the-badge&logo=redis&logoColor=7cb2bd" alt="Redis" />
+<br />
 <img src="https://img.shields.io/badge/TypeScript-15252a?style=for-the-badge&logo=typescript&logoColor=7cb2bd" alt="TypeScript" />
+<img src="https://img.shields.io/badge/C%23-15252a?style=for-the-badge&logo=dotnet&logoColor=7cb2bd" alt="C#" />
 <img src="https://img.shields.io/badge/Bash-15252a?style=for-the-badge&logo=gnubash&logoColor=7cb2bd" alt="Bash" />
 <br />
 <img src="https://img.shields.io/badge/Linux-15252a?style=for-the-badge&logo=linux&logoColor=7cb2bd" alt="Linux" />
@@ -76,22 +94,24 @@ Neither has a dependency tree. Both run anywhere Python does, including in CI.
 
 | Area | Detail |
 | :--- | :--- |
-| **Languages** | Python, TypeScript / JavaScript, Bash, SQL |
+| **Languages** | Python, SQL, C#, TypeScript / JavaScript, Bash |
+| **Backend** | FastAPI, REST API design, SQLAlchemy, pydantic validation, JWT authentication, background workers, pytest, GitHub Actions |
+| **Data** | PostgreSQL, Redis, SQLite, SQL Server |
 | **Systems** | Linux (Fedora, Debian), Windows, macOS / Apple Silicon, Docker &amp; Compose, SELinux |
 | **Networking** | TCP/IP, routing &amp; switching, VLANs, DNS &amp; DNS filtering, reverse proxy, tunnelling, VPN gateway routing — CCNA in progress |
 | **Support** | Hardware diagnostics, OS deployment, backup &amp; recovery, end-user troubleshooting |
-| **Data** | pandas, NumPy, Jupyter, statistical analysis |
 
 ---
 
 ## Countdown
 
 ```
-2024 ─── freelance IT & web services                      [ running ]
-2025 ─── homelab: 14 services, 0 inbound ports open       [ running ]
-2026 ─── anchorwatch · changelog-guard published          [ shipped  ]
-2026 ─── BSc Computer Science                             [ 00 : xx  ]
-20XX ─── CCNA                                             [ counting ]
+2024 ─── freelance IT & web services                       [ running ]
+2025 ─── homelab: 14 services, 0 inbound ports open        [ running ]
+2026 ─── distributed-task-queue, tested end to end         [ shipped  ]
+2026 ─── monitoring & alerting · staff management system   [ building  ]
+2026 ─── BSc Computer Science                              [ 00 : xx  ]
+20XX ─── CCNA                                              [ counting ]
 ```
 
 ---
@@ -104,7 +124,7 @@ Neither has a dependency tree. Both run anywhere Python does, including in CI.
 | **Site** | [kota.dpdns.org](https://kota.dpdns.org) |
 | **GitHub** | [@kota1738](https://github.com/kota1738) |
 
-Open to IT support, infrastructure, and network roles. Happy to talk about homelabs at greater length than is strictly reasonable.
+Open to backend, platform, infrastructure and IT support roles. Happy to talk about homelabs at greater length than is strictly reasonable.
 
 <div align="center">
 <br />
