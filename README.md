@@ -22,7 +22,7 @@ Services that run reliably, data that survives failure, and the Linux estate the
 
 Final-year Computer Science student, graduating 2026 (predicted 2:1), working through the **CCNA**. Freelance IT and web services since 2024 — hardware and OS support, network setup, small business sites.
 
-Most of what I learn happens on hardware I own. I run **fifteen containerised services** on ARM64 Fedora with SELinux enforcing, defined in a single Docker Compose file. Egress for selected containers is policy-routed through a VPN gateway, Pi-hole handles DNS filtering, and backups run on a schedule with rsync.
+Most of what I learn happens on hardware I own. I run **thirty containers** on ARM64 Fedora with SELinux enforcing, defined in a single Docker Compose file. Egress for selected containers is policy-routed through a VPN gateway, Pi-hole handles DNS filtering, and backups run on a schedule with rsync.
 
 Public services are exposed through a **Cloudflare Tunnel** — an outbound-only connector, so there is no port forwarding and **no inbound port open on the network**. This README's sibling site is served that way.
 
@@ -34,9 +34,9 @@ Looking for **backend, platform and infrastructure roles**.
 
 ## Projects
 
-Three projects, built in the open and in this order. One is shipped; the other two are underway and will be linked here when they run end to end. Nothing on this page is a plan dressed up as a finished thing — the status is on every entry.
+Three projects, built in the open and in this order. Two run on the server described above; the third is a repository you can clone and test. Nothing on this page is a plan dressed up as a finished thing — the status is on every entry.
 
-### 01 — Distributed task queue API &nbsp;`shipped`
+### 01 — Distributed task queue API &nbsp;`running`
 
 [**distributed-task-queue**](https://github.com/kota1738/distributed-task-queue) — an asynchronous job-processing service. Clients submit work over REST and get an id back immediately; separate worker processes claim jobs and execute them, and every job is trackable through `queued`, `running`, `succeeded`, `failed` and `cancelled`.
 
@@ -46,7 +46,8 @@ Python · FastAPI · PostgreSQL · Redis · Docker · pytest · GitHub Actions
 - Workers claim jobs atomically with `SELECT … FOR UPDATE SKIP LOCKED` plus a status guard, so concurrent workers never run the same job twice.
 - Retries with **exponential backoff** and per-job attempt limits, idempotency keys so client retries are safe, and a lease reaper that requeues jobs orphaned by a crashed worker.
 - JWT bearer auth with per-user job isolation; payloads validated against the job type's schema **before** the row is written, so a bad job fails with `422` rather than inside a worker.
-- **64 tests** covering API, worker, auth and handlers, run in CI against real PostgreSQL and Redis; Docker Compose deployment with readiness and liveness probes.
+- **68 tests** covering API, worker, auth and handlers, run in CI against real PostgreSQL and Redis; Docker Compose deployment with readiness and liveness probes.
+- Deployed as **five containers** on the server, with the API and database bound to loopback and Prometheus scraping its `/metrics` over a private Docker network.
 
 ```bash
 git clone https://github.com/kota1738/distributed-task-queue
@@ -57,10 +58,10 @@ cd distributed-task-queue && python scripts/demo.py   # full lifecycle, no servi
 
 [**monitoring-stack**](https://github.com/kota1738/monitoring-stack) — a seven-container observability stack running on the server above: **Prometheus**, **Alertmanager**, **Grafana**, node_exporter, cAdvisor and blackbox_exporter, each under a memory limit so monitoring cannot starve the media services it watches.
 
-- **13 alert rules** across host, container and availability groups, plus a deliberately permanent Watchdog: a silent pipeline and a healthy system look identical otherwise.
+- **13 alert rules** across host, container, availability and task-queue groups, plus a deliberately permanent Watchdog: a silent pipeline and a healthy system look identical otherwise.
 - **Three dashboards** provisioned from version-controlled JSON, so a fresh deployment needs no manual setup.
-- **Delivery proven, not assumed:** a real disk alert at 13% free fired and reached the receiver, and its resolution arrived too.
-- `alert-sink` is part of the stack — it records every notification, which is the only way to show alerts actually arrive.
+- **Eight scrape targets, all up**, including the task queue API's own metrics inside the cluster.
+- **Delivery proven, not assumed:** a real disk alert at 13% free fired, and a hand-fired test alert and its resolution both reached Discord. `alert-sink` records every notification, which is the only way to show alerts actually arrive.
 
 Stack: Prometheus · Alertmanager · Grafana · cAdvisor · Docker · Linux
 
@@ -69,8 +70,8 @@ Stack: Prometheus · Alertmanager · Grafana · cAdvisor · Docker · Linux
 [**staff-management**](https://github.com/kota1738/staff-management) — a C# REST API over EF Core: staff records with search, filtering and paging, cookie sessions with PBKDF2 hashes, and Viewer/Manager/Admin policies enforced at the HTTP layer.
 
 - **Email uniqueness is a database index**, and a test proves it by inserting a duplicate directly rather than trusting the handler.
-- **16 integration tests** drive the real pipeline through `WebApplicationFactory`, covering 401 and 403 paths, validation, duplicates and paging.
-- SQL Server migrations plus Docker Compose, so the deployment is repeatable rather than remembered.
+- **16 integration tests** drive the real pipeline through `WebApplicationFactory`, covering 401 and 403 paths, validation, duplicates and paging; CI builds with warnings as errors.
+- SQL Server migrations plus Docker Compose, so the deployment is repeatable rather than remembered. Not deployed: the evidence is the suite and the recipe, not a URL.
 
 Stack: C# · ASP.NET Core · EF Core · SQL Server · xUnit
 
