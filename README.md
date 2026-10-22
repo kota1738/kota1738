@@ -53,19 +53,26 @@ git clone https://github.com/kota1738/distributed-task-queue
 cd distributed-task-queue && python scripts/demo.py   # full lifecycle, no services needed
 ```
 
-### 02 — Infrastructure monitoring and alerting &nbsp;`in progress`
+### 02 — Infrastructure monitoring and alerting &nbsp;`deployed`
 
-Observability for the estate described above: a Python collector for CPU, memory, disk and per-service health, **Prometheus** for storage, **Grafana** for dashboards, alert rules that fire on defined thresholds, and runbooks for troubleshooting and recovery.
+[**monitoring-stack**](https://github.com/kota1738/monitoring-stack) — a seven-container observability stack running on the server above: **Prometheus**, **Alertmanager**, **Grafana**, node_exporter, cAdvisor and blackbox_exporter, each under a memory limit so monitoring cannot starve the media services it watches.
 
-Stack: Python · Linux · Docker · Prometheus · Grafana · notification webhook
-Status: specification complete, implementation underway.
+- **13 alert rules** across host, container and availability groups, plus a deliberately permanent Watchdog: a silent pipeline and a healthy system look identical otherwise.
+- **Three dashboards** provisioned from version-controlled JSON, so a fresh deployment needs no manual setup.
+- **Delivery proven, not assumed:** a real disk alert at 13% free fired and reached the receiver, and its resolution arrived too.
+- `alert-sink` is part of the stack — it records every notification, which is the only way to show alerts actually arrive.
 
-### 03 — Staff management system &nbsp;`in progress`
+Stack: Prometheus · Alertmanager · Grafana · cAdvisor · Docker · Linux
 
-A C# application backed by a relational database, taken from coursework to something independently demonstrable: full CRUD with filtering, login and role-based permissions, database constraints, automated tests and a repeatable deployment.
+### 03 — Staff management system &nbsp;`shipped`
 
-Stack: C# · ASP.NET Core · SQL Server · xUnit
-Status: implementation underway.
+[**staff-management**](https://github.com/kota1738/staff-management) — a C# REST API over EF Core: staff records with search, filtering and paging, cookie sessions with PBKDF2 hashes, and Viewer/Manager/Admin policies enforced at the HTTP layer.
+
+- **Email uniqueness is a database index**, and a test proves it by inserting a duplicate directly rather than trusting the handler.
+- **16 integration tests** drive the real pipeline through `WebApplicationFactory`, covering 401 and 403 paths, validation, duplicates and paging.
+- SQL Server migrations plus Docker Compose, so the deployment is repeatable rather than remembered.
+
+Stack: C# · ASP.NET Core · EF Core · SQL Server · xUnit
 
 ---
 
@@ -95,8 +102,9 @@ Status: implementation underway.
 | Area | Detail |
 | :--- | :--- |
 | **Languages** | Python, SQL, C#, TypeScript / JavaScript, Bash |
-| **Backend** | FastAPI, REST API design, SQLAlchemy, pydantic validation, JWT authentication, background workers, pytest, GitHub Actions |
+| **Backend** | FastAPI, ASP.NET Core, EF Core, REST API design, SQLAlchemy, pydantic validation, JWT authentication, background workers, pytest, xUnit |
 | **Data** | PostgreSQL, Redis, SQLite, SQL Server |
+| **Observability** | Prometheus, Grafana, Alertmanager, node_exporter, cAdvisor, blackbox probes, dashboards as code, runbooks |
 | **Systems** | Linux (Fedora, Debian), Windows, macOS / Apple Silicon, Docker &amp; Compose, SELinux |
 | **Networking** | TCP/IP, routing &amp; switching, VLANs, DNS &amp; DNS filtering, reverse proxy, tunnelling, VPN gateway routing — CCNA in progress |
 | **Support** | Hardware diagnostics, OS deployment, backup &amp; recovery, end-user troubleshooting |
@@ -108,8 +116,8 @@ Status: implementation underway.
 ```
 2024 ─── freelance IT & web services                       [ running ]
 2025 ─── homelab: 15 services, 0 inbound ports open        [ running ]
-2026 ─── distributed-task-queue, tested end to end         [ shipped  ]
-2026 ─── monitoring & alerting · staff management system   [ building  ]
+2026 ─── distributed-task-queue, tested end to end         [ shipped   ]
+2026 ─── monitoring stack deployed · staff API shipped     [ shipped   ]
 2026 ─── BSc Computer Science                              [ 00 : xx  ]
 20XX ─── CCNA                                              [ counting ]
 ```
