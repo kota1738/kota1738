@@ -22,7 +22,7 @@ Services that run reliably, data that survives failure, and the Linux estate the
 
 Final-year Computer Science student, graduating 2026 (predicted 2:1), working through the **CCNA**. Freelance IT and web services since 2024 — hardware and OS support, network setup, small business sites.
 
-Most of what I learn happens on hardware I own. I run **fourteen containerised services** on ARM64 Fedora with SELinux enforcing, defined in a single Docker Compose file. Egress for selected containers is policy-routed through a VPN gateway, Pi-hole handles DNS filtering, and backups run on a schedule with rsync.
+Most of what I learn happens on hardware I own. I run **fifteen containerised services** on ARM64 Fedora with SELinux enforcing, defined in a single Docker Compose file. Egress for selected containers is policy-routed through a VPN gateway, Pi-hole handles DNS filtering, and backups run on a schedule with rsync.
 
 Public services are exposed through a **Cloudflare Tunnel** — an outbound-only connector, so there is no port forwarding and **no inbound port open on the network**. This README's sibling site is served that way.
 
@@ -107,7 +107,7 @@ Status: implementation underway.
 
 ```
 2024 ─── freelance IT & web services                       [ running ]
-2025 ─── homelab: 14 services, 0 inbound ports open        [ running ]
+2025 ─── homelab: 15 services, 0 inbound ports open        [ running ]
 2026 ─── distributed-task-queue, tested end to end         [ shipped  ]
 2026 ─── monitoring & alerting · staff management system   [ building  ]
 2026 ─── BSc Computer Science                              [ 00 : xx  ]
